@@ -1,9 +1,11 @@
-# Travel Planning App
+# Roamie
+## Find your roaming buddy
 
-A modern, user-friendly mobile application designed to help you plan, organize, and enjoy your travels with ease.
+A modern, user-friendly mobile application designed to help you plan, organize, and share your travels with ease.
 
 ## Table of Contents
-- [Travel Planning App](#travel-planning-app)
+- [Roamie](#roamie)
+  - [Find your roaming buddy](#find-your-roaming-buddy)
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
   - [Screenshots](#screenshots)
