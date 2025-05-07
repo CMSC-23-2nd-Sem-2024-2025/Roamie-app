@@ -29,8 +29,8 @@ A modern, user-friendly mobile application designed to help you plan, organize, 
 ## Installation
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/travelplanning_app.git
-   cd travelplanning_app
+   git clone https://github.com/CMSC-23-2nd-Sem-2024-2025/project-pagbilao-pagcaliwagan-mandap.git
+   cd project-pagbilao-pagcaliwagan-mandap
    ```
 2. **Install dependencies:**
    ```bash
