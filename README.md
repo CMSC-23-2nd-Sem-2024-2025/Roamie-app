@@ -9,6 +9,10 @@ A modern, user-friendly mobile application designed to help you plan, organize, 
   - [Screenshots](#screenshots)
   - [Installation](#installation)
   - [Deployment](#deployment)
+  - [Developer Guidelines](#developer-guidelines)
+    - [Best Coding Practices](#best-coding-practices)
+    - [Branching Strategy](#branching-strategy)
+    - [Commit Message Format](#commit-message-format)
 
 ## Features
 - Create and manage travel plans
@@ -45,3 +49,26 @@ To deploy the app in APK format, follow these steps:
    The APK file will be located at `build/app/outputs/flutter-apk/app-release.apk`.
 3. **Install the APK:**
    Transfer the APK file to your Android device and install it.
+
+## Developer Guidelines
+### Best Coding Practices
+- Follow the Flutter style guide for consistent code formatting.
+- Write meaningful comments and documentation for your code.
+- Use meaningful variable and function names.
+
+### Branching Strategy
+- Use feature branches for new features or bug fixes.
+- Branch naming convention: `feature/feature-name` or `fix/bug-name`.
+- Merge feature branches into the `main` branch after code review and testing.
+
+### Commit Message Format
+Follow the [Conventional Commits](https://www.conventionalcommits.org/) format for commit messages:
+- **Types:**
+  - `feat`: A new feature
+  - `fix`: A bug fix
+  - `docs`: Documentation only changes
+  - `style`: Changes that do not affect the meaning of the code
+  - `refactor`: A code change that neither fixes a bug nor adds a feature
+  - `perf`: A code change that improves performance
+  - `test`: Adding missing tests or correcting existing tests
+  - `chore`: Changes to the build process or auxiliary tools and libraries
