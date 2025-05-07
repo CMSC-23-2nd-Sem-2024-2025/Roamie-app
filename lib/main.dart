@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/sign_in_page.dart';
+import 'screens/sign_up_page.dart';
 import 'screens/travel_plans_page.dart';
 import 'screens/find_similar_people_page.dart';
 import 'screens/profile_page.dart';
@@ -15,18 +16,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Travel Planning App',
+      title: 'Roamie',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
       initialRoute: '/signin',
       routes: {
         '/signin': (context) => const SignInPage(),
-        '/travelplans': (context) => const TravelPlansPage(),
-        '/findsimilarpeople': (context) => const FindSimilarPeoplePage(),
-        '/profile': (context) => const ProfilePage(),
+        '/signup': (context) => const SignUpPage(),
+        '/home': (context) => const HomePage(),
       },
-      home: const HomePage(),
     );
   }
 }
