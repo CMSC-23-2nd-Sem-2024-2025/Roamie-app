@@ -19,4 +19,9 @@ class FirebaseUserAPI {
   Stream<QuerySnapshot> getUserInfo(String userId) {
     return db.collection('users').where('userId', isEqualTo: userId).snapshots(); 
   }
+
+   // Fetch all users
+  Stream<QuerySnapshot> getAllUsers() {
+    return db.collection('users').snapshots();
+  }
 }

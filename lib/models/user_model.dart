@@ -2,11 +2,11 @@ import 'dart:convert';
 
 class AppUser {
   String? id;
-  String fname;
-  String lname;
+  String firstName;
+  String lastName;
   String email;
-  String userName;
-  String travelStyle;
+  String username;
+  List<String>? travelStyles;
   List<String>? interests;
   // base64
   String? profilePicture; 
@@ -16,12 +16,12 @@ class AppUser {
 
   AppUser({
     this.id,
-    required this.fname,
-    required this.lname,
+    required this.firstName,
+    required this.lastName,
     required this.email,
-    required this.userName,
-    required this.travelStyle,
-    // Interest and Profile are nullable
+    required this.username,
+    //  Interest, Style and Profile are nullable
+    this.travelStyles,
     this.interests,
     this.profilePicture,
     required this.isVisible,
@@ -31,11 +31,11 @@ class AppUser {
   factory AppUser.fromJson(Map<String, dynamic> json) {
     return AppUser(
       id: json['id'],
-      fname: json['fname'],
-      lname: json['lname'],
+      firstName: json['firstName'],
+      lastName: json['lastName'],
       email: json['email'],
-      userName: json['userName'],
-      travelStyle: json['travelStyle'],
+      username: json['username'],
+      travelStyles: List<String>.from(json['travelStyles'] ?? []),
       // if interest is empty set it to null
       interests: List<String>.from(json['interests'] ?? []),
       profilePicture: json['profilePicture'],
@@ -51,11 +51,11 @@ class AppUser {
 
   Map<String, dynamic> toJson() {
     return {
-      'fname': fname,
-      'lname': lname,
+      'firstName': firstName,
+      'lastName': lastName,
       'email': email,
-      'userName': userName,
-      'travelStyle': travelStyle,
+      'username': username,
+      'travelStyles': travelStyles,
       'interests': interests,
       'profilePicture': profilePicture,
       'isVisible': isVisible,
