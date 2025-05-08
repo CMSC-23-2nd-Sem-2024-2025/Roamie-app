@@ -24,7 +24,7 @@ class AppUser {
     // Interest and Profile are nullable
     this.interests,
     this.profilePicture,
-    this.isVisible = true,
+    required this.isVisible,
     required this.userId,
   });
 
@@ -39,7 +39,7 @@ class AppUser {
       // if interest is empty set it to null
       interests: List<String>.from(json['interests'] ?? []),
       profilePicture: json['profilePicture'],
-      isVisible: json['isVisible'] ?? true,
+      isVisible: json['isVisible'],
       userId: json['userId'],
     );
   }
