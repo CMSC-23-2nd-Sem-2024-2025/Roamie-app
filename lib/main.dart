@@ -7,11 +7,15 @@ import 'screens/travel_plans_page.dart';
 import 'screens/find_similar_people_page.dart';
 import 'screens/profile_page.dart';
 import 'components/bottom_nav_bar.dart';
+import 'package:provider/provider.dart';
+import 'package:roamie/provider/user_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(create: (_) => UserProvider(), child: const MyApp()),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -22,9 +26,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Roamie',
       theme: ThemeData(
+        fontFamily: 'Poppins',
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      initialRoute: '/signin',
+      initialRoute: '/signup',
       routes: {
         '/signin': (context) => const SignInPage(),
         '/signup': (context) => const SignUpPage(),
