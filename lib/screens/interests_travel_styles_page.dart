@@ -32,7 +32,6 @@ class _InterestsTravelStylesPageState extends State<InterestsTravelStylesPage> {
   void _onNext() {
     final interests = _splitInput(_interestsController.text);
     final travelStyles = _splitInput(_travelStylesController.text);
-    print('Interests: $interests, TravelStyles: $travelStyles');
     widget.onNext(interests, travelStyles);
   }
 
@@ -116,7 +115,10 @@ class _InterestsTravelStylesPageState extends State<InterestsTravelStylesPage> {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                     ),
                     onPressed: _onNext,
-                    child: const Text('Next', style: TextStyle(fontSize: 16)),
+                    child: const Text(
+                      'Next',
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 32),

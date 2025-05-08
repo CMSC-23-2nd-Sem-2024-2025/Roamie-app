@@ -52,7 +52,7 @@ class _SignUpPageState extends State<SignUpPage> {
         if (userCredential.user != null) {
           final String userId = userCredential.user!.uid;
 
-          // Navigate to interests page
+          // Navigate to travel styles-interests page
           if (!mounted) return;
           Navigator.push(
             context,
@@ -60,7 +60,6 @@ class _SignUpPageState extends State<SignUpPage> {
               builder:
                   (context) => InterestsTravelStylesPage(
                     onNext: (interests, travelStyles) async {
-                      print('onNext called with: $interests, $travelStyles');
                       // Create user object with all data
                       final AppUser newUser = AppUser(
                         firstName: _firstNameController.text.trim(),
@@ -152,7 +151,6 @@ class _SignUpPageState extends State<SignUpPage> {
                 const Text(
                   'ROAMIE',
                   style: TextStyle(
-                    fontFamily: 'Poppins',
                     fontWeight: FontWeight.bold,
                     fontSize: 24,
                     color: Colors.deepOrange,
@@ -160,22 +158,14 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 const Text(
                   'Find your roaming buddy',
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
                 ),
                 const SizedBox(height: 24),
                 const Align(
                   alignment: Alignment.center,
                   child: Text(
                     'Create Account',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.bold,
-                      fontSize: 28,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -190,10 +180,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     child: Text(
                       _errorMessage!,
-                      style: TextStyle(
-                        color: Colors.red.shade800,
-                        fontFamily: 'Poppins',
-                      ),
+                      style: TextStyle(color: Colors.red.shade800),
                     ),
                   ),
                 Form(
@@ -206,17 +193,13 @@ class _SignUpPageState extends State<SignUpPage> {
                         decoration: const InputDecoration(
                           labelText: 'FIRST NAME',
                           labelStyle: TextStyle(
-                            fontFamily: 'Poppins',
                             fontWeight: FontWeight.w600,
                             fontSize: 12,
                             color: Colors.black54,
                             letterSpacing: 1.2,
                           ),
                           hintText: 'Juan',
-                          hintStyle: TextStyle(
-                            fontFamily: 'Poppins',
-                            color: Colors.black45,
-                          ),
+                          hintStyle: TextStyle(color: Colors.black45),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(16)),
                           ),
@@ -236,17 +219,13 @@ class _SignUpPageState extends State<SignUpPage> {
                         decoration: const InputDecoration(
                           labelText: 'LAST NAME',
                           labelStyle: TextStyle(
-                            fontFamily: 'Poppins',
                             fontWeight: FontWeight.w600,
                             fontSize: 12,
                             color: Colors.black54,
                             letterSpacing: 1.2,
                           ),
                           hintText: 'Dela Cruz',
-                          hintStyle: TextStyle(
-                            fontFamily: 'Poppins',
-                            color: Colors.black45,
-                          ),
+                          hintStyle: TextStyle(color: Colors.black45),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(16)),
                           ),
@@ -267,17 +246,13 @@ class _SignUpPageState extends State<SignUpPage> {
                         decoration: const InputDecoration(
                           labelText: 'PASSWORD',
                           labelStyle: TextStyle(
-                            fontFamily: 'Poppins',
                             fontWeight: FontWeight.w600,
                             fontSize: 12,
                             color: Colors.black54,
                             letterSpacing: 1.2,
                           ),
                           hintText: '******',
-                          hintStyle: TextStyle(
-                            fontFamily: 'Poppins',
-                            color: Colors.black45,
-                          ),
+                          hintStyle: TextStyle(color: Colors.black45),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(16)),
                           ),
@@ -297,17 +272,13 @@ class _SignUpPageState extends State<SignUpPage> {
                         decoration: const InputDecoration(
                           labelText: 'USERNAME',
                           labelStyle: TextStyle(
-                            fontFamily: 'Poppins',
                             fontWeight: FontWeight.w600,
                             fontSize: 12,
                             color: Colors.black54,
                             letterSpacing: 1.2,
                           ),
                           hintText: 'juan_delacruz123',
-                          hintStyle: TextStyle(
-                            fontFamily: 'Poppins',
-                            color: Colors.black45,
-                          ),
+                          hintStyle: TextStyle(color: Colors.black45),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(16)),
                           ),
@@ -327,17 +298,13 @@ class _SignUpPageState extends State<SignUpPage> {
                         decoration: const InputDecoration(
                           labelText: 'EMAIL',
                           labelStyle: TextStyle(
-                            fontFamily: 'Poppins',
                             fontWeight: FontWeight.w600,
                             fontSize: 12,
                             color: Colors.black54,
                             letterSpacing: 1.2,
                           ),
                           hintText: 'juandelacruz@email.com',
-                          hintStyle: TextStyle(
-                            fontFamily: 'Poppins',
-                            color: Colors.black45,
-                          ),
+                          hintStyle: TextStyle(color: Colors.black45),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(16)),
                           ),
@@ -376,9 +343,9 @@ class _SignUpPageState extends State<SignUpPage> {
                                     : const Text(
                                       'Next',
                                       style: TextStyle(
-                                        fontFamily: 'Poppins',
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
+                                        color: Colors.white,
                                       ),
                                     ),
                           ),

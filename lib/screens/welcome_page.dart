@@ -42,7 +42,6 @@ class WelcomePage extends StatelessWidget {
                       style: TextStyle(fontSize: 16, color: Colors.black),
                     ),
                     Icon(Icons.chevron_right),
-                    Icon(Icons.chevron_right),
                   ],
                 ),
               ),
