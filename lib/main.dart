@@ -1,25 +1,20 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:roamie/firebase_options.dart';
-import 'package:roamie/provider/user_provider.dart';
 import 'screens/sign_in_page.dart';
 import 'screens/sign_up_page.dart';
 import 'screens/travel_plans_page.dart';
 import 'screens/find_similar_people_page.dart';
 import 'screens/profile_page.dart';
 import 'components/bottom_nav_bar.dart';
+import 'package:provider/provider.dart';
+import 'package:roamie/provider/user_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => UserProvider()),
-      ],
-      child: const MyApp(),
-    ),
+    ChangeNotifierProvider(create: (_) => UserProvider(), child: const MyApp()),
   );
 }
 
@@ -31,14 +26,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Roamie',
       theme: ThemeData(
+        fontFamily: 'Poppins',
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      initialRoute: '/profilepage',
+      initialRoute: '/signup',
       routes: {
         '/signin': (context) => const SignInPage(),
         '/signup': (context) => const SignUpPage(),
         '/home': (context) => const HomePage(),
-        '/profilepage':(context) => const ProfilePage()
       },
     );
   }
