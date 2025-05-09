@@ -16,9 +16,13 @@ class UserProvider with ChangeNotifier {
     // Get current user ID
     userId = FirebaseAuth.instance.currentUser?.uid;
 
-    getAllUsers();
+    if (userId != null) {
+      // If userId is not null, fetch user data
+      getUser(userId!);
+    }
     notifyListeners();
   }
+
 
   Future<void> getUser(String id) async {
     userStream = firebaseService.getUserInfo(id);
