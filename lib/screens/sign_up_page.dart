@@ -202,6 +202,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           hintStyle: TextStyle(color: Colors.black45),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(16)),
+                            borderSide: BorderSide.none,
                           ),
                           filled: true,
                           fillColor: Color(0xFFF2F2F2),
@@ -228,6 +229,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           hintStyle: TextStyle(color: Colors.black45),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(16)),
+                            borderSide: BorderSide.none,
                           ),
                           filled: true,
                           fillColor: Color(0xFFF2F2F2),
@@ -255,6 +257,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           hintStyle: TextStyle(color: Colors.black45),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(16)),
+                            borderSide: BorderSide.none,
                           ),
                           filled: true,
                           fillColor: Color(0xFFF2F2F2),
@@ -281,6 +284,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           hintStyle: TextStyle(color: Colors.black45),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(16)),
+                            borderSide: BorderSide.none,
                           ),
                           filled: true,
                           fillColor: Color(0xFFF2F2F2),
@@ -307,6 +311,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           hintStyle: TextStyle(color: Colors.black45),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(16)),
+                            borderSide: BorderSide.none,
                           ),
                           filled: true,
                           fillColor: Color(0xFFF2F2F2),
@@ -318,38 +323,68 @@ class _SignUpPageState extends State<SignUpPage> {
                                     : null,
                       ),
                       const SizedBox(height: 24),
-                      Center(
-                        child: SizedBox(
-                          width: 180,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.indigo[900],
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              style: OutlinedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                                side: BorderSide(color: Colors.indigo[900]!),
                               ),
-                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              onPressed:
+                                  _isLoading
+                                      ? null
+                                      : () => Navigator.pop(context),
+                              child: Text(
+                                'Back',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.indigo[900],
+                                ),
+                              ),
                             ),
-                            onPressed: _isLoading ? null : _onSignUp,
-                            child:
-                                _isLoading
-                                    ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                    : const Text(
-                                      'Next',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
                           ),
-                        ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.indigo[900],
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
+                              ),
+                              onPressed: _isLoading ? null : _onSignUp,
+                              child:
+                                  _isLoading
+                                      ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2,
+                                        ),
+                                      )
+                                      : const Text(
+                                        'Next',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 32),
                     ],
