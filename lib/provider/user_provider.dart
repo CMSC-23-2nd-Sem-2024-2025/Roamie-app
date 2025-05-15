@@ -7,14 +7,17 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class UserProvider with ChangeNotifier {
   final FirebaseUserAPI firebaseService = FirebaseUserAPI();
-  String? userId;
+  String? _userId;
   Stream<QuerySnapshot>? _userStream;
+
+  // getter
+  String? get userId => _userId;
 
   // Get the current user ID and load user data
   UserProvider() {
-    userId = FirebaseAuth.instance.currentUser?.uid;
-    if (userId != null) {
-      getUser(userId!);
+    _userId = FirebaseAuth.instance.currentUser?.uid;
+    if (_userId != null) {
+      getUser(_userId!);
     }
   }
   
@@ -29,6 +32,14 @@ class UserProvider with ChangeNotifier {
   // Add user to the collection
   Future<void> addUser(AppUser user) async { 
     String message = await firebaseService.addUser(user.toJson());
+    print(message);
+    notifyListeners();
+  }
+
+   Future<void> updateUser(String userId, Map<String, dynamic> data) async {
+    if (userId.isEmpty) return;
+
+    String message = await firebaseService.updateUserByUserId(userId, data);
     print(message);
     notifyListeners();
   }

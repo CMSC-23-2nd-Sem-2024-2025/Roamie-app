@@ -1,10 +1,21 @@
+
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:roamie/provider/user_provider.dart';
+import 'package:image_picker/image_picker.dart';
 
-class ProfilePage extends StatelessWidget {
+
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage>{
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +38,7 @@ class ProfilePage extends StatelessWidget {
 
         final userData = snapshot.data!.docs.first.data() as Map<String, dynamic>;
         final username = userData['username'] ?? 'Username';
-        final name = "${userData['firstName']} ${userData['lastName']}" ?? 'Name';
+        final name = "${userData['firstName']} ${userData['lastName']}";
         final interests = List<String>.from(userData['interests'] ?? []);
         final travelStyles = List<String>.from(userData['travelStyles'] ?? []);
 
@@ -87,9 +98,10 @@ class ProfilePage extends StatelessWidget {
       },
     );
   }
+  
 }
 
-class ProfileHeader extends StatelessWidget {
+class ProfileHeader extends StatefulWidget {
   final String username;
   final String name;
   final List<String> interests;
@@ -102,6 +114,40 @@ class ProfileHeader extends StatelessWidget {
     required this.interests,
     required this.travelStyles,
   });
+
+  @override
+  State<ProfileHeader> createState() => _ProfileHeaderState();
+}
+
+class _ProfileHeaderState extends State<ProfileHeader> {
+  Uint8List? _image;
+
+  // Pick Image for profile picture
+  Future<void> _pickImage() async {
+  final userProvider = Provider.of<UserProvider>(context, listen: false);
+  final userId = userProvider.userId; 
+
+  if (userId == null) {
+    return;
+  }
+
+  final ImagePicker picker = ImagePicker();
+  final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+  if (pickedFile != null) {
+    final Uint8List bytes = await pickedFile.readAsBytes();
+    setState(() {
+      _image = bytes;
+    });
+
+    String base64Image = base64Encode(bytes);
+
+    // Update user document with profile picture
+   await userProvider.updateUser(userId, {'profilePicture': base64Image});
+
+  }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -118,11 +164,19 @@ class ProfileHeader extends StatelessWidget {
             const SizedBox(height: 100),
           ],
         ),
-        const Positioned(
+        Positioned(
           top: 20,
           left: 20,
-          child: CircleAvatar(
-            radius: 65,
+          child: GestureDetector(
+            onTap: _pickImage,
+            child: CircleAvatar(
+              radius: 65,
+              backgroundImage: _image != null ? MemoryImage(_image!) : null,
+              backgroundColor: Colors.grey[300],
+              child: _image == null
+                  ? const Icon(Icons.add_a_photo, size: 30, color: Colors.white)
+                  : null,
+            ),
           ),
         ),
         Positioned(
@@ -132,7 +186,7 @@ class ProfileHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                username,
+                widget.username,
                 style: const TextStyle(
                   fontSize: 35,
                   fontWeight: FontWeight.bold,
@@ -140,7 +194,7 @@ class ProfileHeader extends StatelessWidget {
                 ),
               ),
               Text(
-                name,
+                widget.name,
                 style: const TextStyle(
                   fontSize: 25,
                   color: Color(0xFF101653),
@@ -154,7 +208,6 @@ class ProfileHeader extends StatelessWidget {
     );
   }
 }
-
 
 
 class EditButton extends StatelessWidget {
