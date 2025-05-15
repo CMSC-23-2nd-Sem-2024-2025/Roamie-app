@@ -6,40 +6,32 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 
 class UserProvider with ChangeNotifier {
-  late final FirebaseUserAPI firebaseService;
+  final FirebaseUserAPI firebaseService = FirebaseUserAPI();
   String? userId;
+  Stream<QuerySnapshot>? _userStream;
 
-  Stream<QuerySnapshot>? userStream;
-
+  // Get the current user ID and load user data
   UserProvider() {
-    firebaseService = FirebaseUserAPI();
-    // Get current user ID
     userId = FirebaseAuth.instance.currentUser?.uid;
-
     if (userId != null) {
-      // If userId is not null, fetch user data
       getUser(userId!);
     }
+  }
+  
+  //stream of current user data
+  Stream<QuerySnapshot>? get userStream => _userStream;
+
+  void getUser(String id) {
+    _userStream = firebaseService.getUserInfo(id);
     notifyListeners();
   }
 
-
-  Future<void> getUser(String id) async {
-    userStream = firebaseService.getUserInfo(id);
-    print(userStream);
-    notifyListeners();
-  }
-
+  // Add user to the collection
   Future<void> addUser(AppUser user) async { 
     String message = await firebaseService.addUser(user.toJson());
     print(message);
     notifyListeners();
   }
 
-  Future<void> getAllUsers() async {
-    userStream = firebaseService.getAllUsers(); // Fetch all users
-    print(userStream);
-    notifyListeners();
-  }
 
 }
