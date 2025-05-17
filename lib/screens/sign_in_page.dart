@@ -119,6 +119,46 @@ class _SignInPageState extends State<SignInPage> {
 
       // Successful sign-in and fetch user data from Firestore
       if (userCredential.user != null) {
+        final String userId = userCredential.user!.uid;
+        final User? firebaseUser = userCredential.user;
+
+        // Check if user data exists in Firestore
+        final userDoc =
+            await FirebaseFirestore.instance
+                .collection('users')
+                .doc(userId)
+                .get();
+
+        if (!userDoc.exists) {
+          // Create a new user document if it doesn't exist
+          final newUser = {
+            'userId': userId,
+            'email': firebaseUser?.email,
+            'firstName': '',
+            'lastName': '',
+            'username': firebaseUser?.email,
+            'profilePicture':
+                firebaseUser?.photoURL, // Google profile picture URL
+            'isVisible': true,
+            'travelStyles': [],
+            'interests': [],
+          };
+
+          // Extract first and last names from displayName
+          final displayNameParts = firebaseUser?.displayName?.split(' ');
+          if (displayNameParts != null && displayNameParts.isNotEmpty) {
+            newUser['firstName'] = displayNameParts[0];
+            if (displayNameParts.length > 1) {
+              newUser['lastName'] = displayNameParts.sublist(1).join(' ');
+            }
+          }
+
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(userId)
+              .set(newUser);
+        }
+
         // Navigate to home page
         if (!mounted) return;
         Navigator.pushReplacementNamed(
