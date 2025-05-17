@@ -6,36 +6,50 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 
 class UserProvider with ChangeNotifier {
-  late final FirebaseUserAPI firebaseService;
-  String? userId;
+  
+  final FirebaseUserAPI firebaseService = FirebaseUserAPI();
 
-  Stream<QuerySnapshot>? userStream;
+  // Private fields to hold the user ID, user data, and stream of user data
+  String? _userId;
+  Map<String, dynamic>? _currentUser;
+  Stream<QuerySnapshot>? _userStream;
 
+  // Public getter for userId
+  String? get userId => _userId;
+
+  // initializes the provider by getting the current user ID and fetching user data
   UserProvider() {
-    firebaseService = FirebaseUserAPI();
-    // Get current user ID
-    userId = FirebaseAuth.instance.currentUser?.uid;
+    _userId = FirebaseAuth.instance.currentUser?.uid;
+    if (_userId != null) {
+      getUser(_userId!);
+    }
+  }
+  
+  // Public getter for user data stream (used with StreamBuilder)
+  Stream<QuerySnapshot>? get userStream => _userStream;
 
-    getAllUsers();
+  // Public getter for the current user data as a Map
+  Map<String, dynamic>? get currentUser => _currentUser;
+
+  // Fetches the user's data as a stream from Firestore and updates the provider
+  void getUser(String id) {
+    _userStream = firebaseService.getUserInfo(id);
     notifyListeners();
   }
 
-  Future<void> getUser(String id) async {
-    userStream = firebaseService.getUserInfo(id);
-    print(userStream);
-    notifyListeners();
-  }
-
+  // Adds a new user to Firestore using the AppUser model
   Future<void> addUser(AppUser user) async { 
     String message = await firebaseService.addUser(user.toJson());
     print(message);
     notifyListeners();
   }
 
-  Future<void> getAllUsers() async {
-    userStream = firebaseService.getAllUsers(); // Fetch all users
-    print(userStream);
+  // Updates the existing user data in Firestore and notifies listeners
+  Future<void> updateUser(String userId, Map<String, dynamic> data) async {
+    if (userId.isEmpty) return;
+
+    String message = await firebaseService.updateUserByUserId(userId, data);
+    print(message);
     notifyListeners();
   }
-
 }
