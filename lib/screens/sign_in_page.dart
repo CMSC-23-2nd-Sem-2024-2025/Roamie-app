@@ -3,6 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:roamie/screens/sign_up_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:roamie/models/user_model.dart';
+import 'package:roamie/screens/interests_travel_styles_page.dart';
+import 'package:roamie/screens/welcome_page.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -130,44 +133,79 @@ class _SignInPageState extends State<SignInPage> {
                 .get();
 
         if (!userDoc.exists) {
-          // Create a new user document if it doesn't exist
-          final newUser = {
-            'userId': userId,
-            'email': firebaseUser?.email,
-            'firstName': '',
-            'lastName': '',
-            'username':
-                firebaseUser?.email?.split(
-                  '@',
-                )[0], // Extract username from email
-            'profilePicture':
-                firebaseUser?.photoURL, // Google profile picture URL
-            'isVisible': true,
-            'travelStyles': [],
-            'interests': [],
-          };
-
           // Extract first and last names from displayName
+          String firstName = '';
+          String lastName = '';
+
           final displayNameParts = firebaseUser?.displayName?.split(' ');
           if (displayNameParts != null && displayNameParts.isNotEmpty) {
-            newUser['firstName'] = displayNameParts[0];
+            firstName = displayNameParts[0];
             if (displayNameParts.length > 1) {
-              newUser['lastName'] = displayNameParts.sublist(1).join(' ');
+              lastName = displayNameParts.sublist(1).join(' ');
             }
           }
 
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(userId)
-              .set(newUser);
-        }
+          // Extract username from email
+          String username = firebaseUser?.email?.split('@')[0] ?? '';
 
-        // Navigate to home page
-        if (!mounted) return;
-        Navigator.pushReplacementNamed(
-          context,
-          '/home',
-        ); // Navigate to home page
+          // Create a new user with their info
+          final AppUser newUser = AppUser(
+            userId: userId,
+            email: firebaseUser?.email ?? '',
+            firstName: firstName,
+            lastName: lastName,
+            username: username,
+            isVisible: true,
+            interests: [],
+            travelStyles: [],
+            profilePicture: firebaseUser?.photoURL,
+          );
+
+          // Navigate to interests/travel styles page for new Google users
+          if (!mounted) return;
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder:
+                  (context) => InterestsTravelStylesPage(
+                    onNext: (interests, travelStyles) async {
+                      // Update user object with interests and travel styles
+                      newUser.interests = interests;
+                      newUser.travelStyles = travelStyles;
+
+                      // Save user to Firestore
+                      await FirebaseFirestore.instance
+                          .collection('users')
+                          .doc(userId)
+                          .set(newUser.toJson());
+
+                      // Navigate to welcome page
+                      if (!mounted) return;
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder:
+                              (context) => WelcomePage(
+                                user: newUser,
+                                onNext: () {
+                                  // Navigate to home page
+                                  Navigator.pushReplacementNamed(
+                                    context,
+                                    '/home',
+                                  );
+                                },
+                              ),
+                        ),
+                      );
+                    },
+                  ),
+            ),
+          );
+        } else {
+          // Existing user - navigate directly to home page
+          if (!mounted) return;
+          Navigator.pushReplacementNamed(context, '/home');
+        }
       }
     } catch (e) {
       setState(() {
