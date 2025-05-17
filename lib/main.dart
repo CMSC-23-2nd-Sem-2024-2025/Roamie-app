@@ -68,10 +68,10 @@ class _HomePageState extends State<HomePage> {
     final userId = FirebaseAuth.instance.currentUser?.uid;
 
     if (userId == null) {
-      // Handle case where user is not logged in, although they should be to reach here
-      return const SignInPage(); // Or show an error/loading indicator
+      return const SignInPage();
     }
 
+    // Fetch profilePicture to pass to Nav Bar Profile Icon
     return StreamBuilder<DocumentSnapshot>(
       stream:
           FirebaseFirestore.instance

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'dart:convert'; // Import for base64Decode
+import 'dart:convert';
 
 class BottomNavBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
   final String?
-  profilePictureBase64; // Add profile picture parameter for base64
-  final String? profilePictureUrl; // Add profile picture parameter for URL
+  profilePictureBase64; // For Firebase account profile pic (base64)
+  final String? profilePictureUrl; // For Google account profile pic (URL type)
 
   const BottomNavBar({
     super.key,
@@ -50,10 +50,7 @@ class BottomNavBar extends StatelessWidget {
       items: [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Travels'),
         BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Find'),
-        BottomNavigationBarItem(
-          icon: profileIcon, // Use the created profileIcon widget
-          label: 'Profile',
-        ),
+        BottomNavigationBarItem(icon: profileIcon, label: 'Profile'),
       ],
     );
   }
