@@ -9,6 +9,8 @@ import 'screens/profile_page.dart';
 import 'components/bottom_nav_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:roamie/provider/user_provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -63,12 +65,48 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-      ),
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+
+    if (userId == null) {
+      // Handle case where user is not logged in, although they should be to reach here
+      return const SignInPage(); // Or show an error/loading indicator
+    }
+
+    return StreamBuilder<DocumentSnapshot>(
+      stream:
+          FirebaseFirestore.instance
+              .collection('users')
+              .doc(userId)
+              .snapshots(),
+      builder: (context, snapshot) {
+        String? profilePictureBase64;
+        String? profilePictureUrl;
+
+        if (snapshot.hasData && snapshot.data!.exists) {
+          final data = snapshot.data!.data() as Map<String, dynamic>?;
+          if (data != null && data.containsKey('profilePicture')) {
+            final profilePicture = data['profilePicture'];
+            if (profilePicture != null && profilePicture is String) {
+              if (profilePicture.startsWith('http') ||
+                  profilePicture.startsWith('https')) {
+                profilePictureUrl = profilePicture;
+              } else {
+                profilePictureBase64 = profilePicture;
+              }
+            }
+          }
+        }
+
+        return Scaffold(
+          body: _screens[_selectedIndex],
+          bottomNavigationBar: BottomNavBar(
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            profilePictureBase64: profilePictureBase64,
+            profilePictureUrl: profilePictureUrl,
+          ),
+        );
+      },
     );
   }
 }
