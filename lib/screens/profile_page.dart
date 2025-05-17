@@ -41,6 +41,7 @@ class _ProfilePageState extends State<ProfilePage>{
         final name = "${userData['firstName']} ${userData['lastName']}";
         final interests = List<String>.from(userData['interests'] ?? []);
         final travelStyles = List<String>.from(userData['travelStyles'] ?? []);
+        final profilePictureBase64 = userData['profilePicture'] ?? '';
 
         return Scaffold(
           body: SingleChildScrollView(
@@ -60,6 +61,7 @@ class _ProfilePageState extends State<ProfilePage>{
                       name: name,
                       interests: interests,
                       travelStyles: travelStyles,
+                      profilePictureBase64: profilePictureBase64,
                     ),
                     const ContactsUser(),
                     const SizedBox(height: 20), 
@@ -106,6 +108,7 @@ class ProfileHeader extends StatefulWidget {
   final String name;
   final List<String> interests;
   final List<String> travelStyles;
+  final String? profilePictureBase64;  
 
   const ProfileHeader({
     super.key,
@@ -113,6 +116,7 @@ class ProfileHeader extends StatefulWidget {
     required this.name,
     required this.interests,
     required this.travelStyles,
+    this.profilePictureBase64
   });
 
   @override
@@ -120,7 +124,24 @@ class ProfileHeader extends StatefulWidget {
 }
 
 class _ProfileHeaderState extends State<ProfileHeader> {
+  // Holds the image data as bytes for displaying the profile picture.
+  // It will be initialized with the decoded base64 image from Firestore if available,
+  // or with the newly picked image bytes.
   Uint8List? _image;
+
+   @override
+  void initState() {
+    super.initState();
+    // When the widget is first created, check if there's a profile picture stored as base64.
+    // If so, decode it to Uint8List and assign it to _image to display it in the avatar.
+    if (widget.profilePictureBase64 != null && widget.profilePictureBase64!.isNotEmpty) {
+      try {
+        _image = base64Decode(widget.profilePictureBase64!);
+      } catch (e) {
+        // optionally log error or ignore
+      }
+    }
+  }
 
   // Pick Image for profile picture
   Future<void> _pickImage() async {
@@ -140,6 +161,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
       _image = bytes;
     });
 
+    // Encode the image bytes to base64 string to save in Firestore.
     String base64Image = base64Encode(bytes);
 
     // Update user document with profile picture
@@ -215,12 +237,17 @@ class EditButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Align(
         alignment: Alignment.centerRight,
         child: ElevatedButton(
           onPressed: () {
+            showDialog(
+              context: context,
+              builder: (_) => EditProfileDialog(),
+            );
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF101653),
@@ -327,3 +354,103 @@ Widget styleGrid(List<String> travelStyles) {
     ),
   );
 }
+
+// Editing widget for the user except for username and email
+class EditProfileDialog extends StatefulWidget {
+  const EditProfileDialog({super.key});
+
+  @override
+  State<EditProfileDialog> createState() => _EditProfileDialogState();
+}
+
+class _EditProfileDialogState extends State<EditProfileDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _firstNameController;
+  late TextEditingController _lastNameController;
+  late TextEditingController _interestsController;
+  late TextEditingController _travelStylesController;
+
+  @override
+  void initState() {
+    super.initState();
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userData = userProvider.currentUser;
+
+    _firstNameController = TextEditingController(text: userData?['firstName'] ?? '');
+    _lastNameController = TextEditingController(text: userData?['lastName'] ?? '');
+    _interestsController = TextEditingController(text: (userData?['interests'] ?? []).join(', '));
+    _travelStylesController = TextEditingController(text: (userData?['travelStyles'] ?? []).join(', '));
+  }
+
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _interestsController.dispose();
+    _travelStylesController.dispose();
+    super.dispose();
+  }
+
+  void _saveChanges() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final userId = userProvider.userId;
+
+    if (_formKey.currentState!.validate() && userId != null) {
+      final updatedData = {
+        'firstName': _firstNameController.text.trim(),
+        'lastName': _lastNameController.text.trim(),
+        'interests': _interestsController.text.split(',').map((e) => e.trim()).toList(),
+        'travelStyles': _travelStylesController.text.split(',').map((e) => e.trim()).toList(),
+      };
+
+      await userProvider.updateUser(userId, updatedData);
+      Navigator.of(context).pop(); // Close dialog
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Edit Profile'),
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _firstNameController,
+                decoration: const InputDecoration(labelText: 'First Name'),
+                validator: (value) => value!.isEmpty ? 'Required' : null,
+              ),
+              TextFormField(
+                controller: _lastNameController,
+                decoration: const InputDecoration(labelText: 'Last Name'),
+                validator: (value) => value!.isEmpty ? 'Required' : null,
+              ),
+              TextFormField(
+                controller: _interestsController,
+                decoration: const InputDecoration(labelText: 'Interests (comma-separated)'),
+              ),
+              TextFormField(
+                controller: _travelStylesController,
+                decoration: const InputDecoration(labelText: 'Travel Styles (comma-separated)'),
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: _saveChanges,
+          child: const Text('Save'),
+        ),
+      ],
+    );
+  }
+}
+
+
