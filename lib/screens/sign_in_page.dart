@@ -136,7 +136,10 @@ class _SignInPageState extends State<SignInPage> {
             'email': firebaseUser?.email,
             'firstName': '',
             'lastName': '',
-            'username': firebaseUser?.email,
+            'username':
+                firebaseUser?.email?.split(
+                  '@',
+                )[0], // Extract username from email
             'profilePicture':
                 firebaseUser?.photoURL, // Google profile picture URL
             'isVisible': true,
