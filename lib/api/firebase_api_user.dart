@@ -15,6 +15,28 @@ class FirebaseUserAPI {
     }
    }
 
+  // Editing Function
+  Future<String> updateUserByUserId(String userId, Map<String, dynamic> data) async {
+  try {
+    final querySnapshot = await db.collection('users')
+      .where('userId', isEqualTo: userId)
+      .get();
+
+    if (querySnapshot.docs.isEmpty) {
+      return 'No user found with userId: $userId';
+    }
+
+    // Assuming only one document matches:
+    final docId = querySnapshot.docs.first.id;
+
+    await db.collection('users').doc(docId).update(data);
+
+    return 'User updated successfully';
+  } catch (e) {
+    return 'Failed to update user: $e';
+  }
+}
+
   // Get the user info via user id
   Stream<QuerySnapshot> getUserInfo(String userId) {
     return db.collection('users').where('userId', isEqualTo: userId).snapshots(); 
