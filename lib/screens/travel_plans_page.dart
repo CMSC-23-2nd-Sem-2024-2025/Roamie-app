@@ -1,8 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../models/travel_model.dart';
-import '../provider/travel_provider.dart'; // <-- your provider
+import '../provider/travel_provider.dart';
 import 'travel_plans_form.dart';
 import 'travel_details_page.dart';
 
@@ -26,39 +26,127 @@ class _TravelPlansPageState extends State<TravelPlansPage> {
 
   @override
   Widget build(BuildContext context) {
-    final plans = context.watch<TravelProvider>().plans;
+    final provider = context.watch<TravelProvider>();
+    final plans = provider.plans;
+    final currentUserId = provider.currentUserId;
+
+    if (currentUserId == null) {
+      return const Scaffold(
+        body: Center(child: Text('Please log in to see your travel plans')),
+      );
+    }
+
+    // Separate owned and shared plans
+    final ownedPlans = plans.where((p) => p.ownerId == currentUserId).toList();
+    final sharedPlans = plans
+        .where((p) =>
+            p.ownerId != currentUserId &&
+            (p.sharedWith?.contains(currentUserId) ?? false))
+        .toList();
 
     return Scaffold(
-      backgroundColor: Color(0xffffffff),
+      backgroundColor: const Color(0xFFFFA500), // Orange background
       appBar: AppBar(
-        backgroundColor: Colors.blue[900],
-        title: const Text("Your Travel Plans :)",
-            style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: Row(
+          children: const [
+            Icon(Icons.travel_explore, color: Colors.orange),
+            SizedBox(width: 8),
+            Text("Roamie",
+                style: TextStyle(
+                    color: Colors.black, fontWeight: FontWeight.bold)),
+          ],
+        ),
       ),
-      body: plans.isEmpty
+      body: (ownedPlans.isEmpty && sharedPlans.isEmpty)
           ? const Center(
               child: Text("No Travel Plans Yet :(",
-                  style: TextStyle(fontSize: 18)))
-          : ListView.builder(
-              padding: const EdgeInsets.all(20),
-              itemCount: plans.length,
-              itemBuilder: (context, index) => GestureDetector(
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => DetailsScreen(plan: plans[index])),
-                ),
-                child: _buildTravelCard(plans[index], index),
+                  style: TextStyle(fontSize: 18, color: Colors.white)),
+            )
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (ownedPlans.isNotEmpty) ...[
+                    const Text(
+                      "Your Travel Plans",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: ownedPlans.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 1,
+                      ),
+                      itemBuilder: (context, index) {
+                        final plan = ownedPlans[index];
+                        return GestureDetector(
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => DetailsScreen(plan: plan)),
+                          ),
+                          child: _buildTravelCard(plan, index),
+                        );
+                      },
+                    ),
+                  ],
+                  if (sharedPlans.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    const Text(
+                      "Shared With You",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: sharedPlans.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 1,
+                      ),
+                      itemBuilder: (context, index) {
+                        final plan = sharedPlans[index];
+                        return GestureDetector(
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => DetailsScreen(plan: plan)),
+                          ),
+                          child: _buildTravelCard(plan, index),
+                        );
+                      },
+                    ),
+                  ],
+                ],
               ),
             ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: Colors.blue[900],
-        onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const TravelPlanFormScreen()));
-        },
+        onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => const TravelPlanFormScreen())),
         icon: const Icon(Icons.add, color: Colors.white),
         label: const Text("CREATE",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
@@ -67,30 +155,89 @@ class _TravelPlansPageState extends State<TravelPlansPage> {
   }
 
   Widget _buildTravelCard(TravelPlan plan, int index) {
-    final backgroundColor = index.isEven
-        ? Colors.orange.withOpacity(0.85)
-        : Colors.blue.withOpacity(0.85);
+    final imageWidget = _buildImage(plan);
+    final startDate = plan.startDate;
+    final endDate = plan.endDate;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Stack(
+        fit: StackFit.expand,
         children: [
-          Text(plan.place,
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          const SizedBox(height: 8),
-          Text("Start Date: ${plan.startDate}"),
-          Text("End Date: ${plan.endDate}"),
-          const SizedBox(height: 8),
-          Text("Notes: ${plan.notes}"),
+          imageWidget,
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.black.withOpacity(0.6),
+                  Colors.transparent,
+                ],
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    startDate == endDate
+                        ? _formatDate(startDate)
+                        : "${_formatDate(startDate)} to ${_formatDate(endDate)}",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                  Text(
+                    plan.place,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    plan.location,
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  Widget _buildImage(TravelPlan plan) {
+    if (plan.imageBase64 != null && plan.imageBase64!.isNotEmpty) {
+      return Image.memory(
+        base64Decode(plan.imageBase64!),
+        fit: BoxFit.cover,
+      );
+    } else {
+      return Image.asset(
+        'lib/assets/placeholder.jpg',
+        fit: BoxFit.cover,
+      );
+    }
+  }
+
+  String _formatDate(String date) {
+    try {
+      final parts = date.split('-');
+      final month = parts[1];
+      final day = parts[2];
+      return "$month/$day";
+    } catch (_) {
+      return date;
+    }
   }
 }
