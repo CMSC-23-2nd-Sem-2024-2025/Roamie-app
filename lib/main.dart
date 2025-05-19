@@ -7,6 +7,7 @@ import 'screens/travel_plans_page.dart';
 import 'screens/find_similar_people_page.dart';
 import 'screens/profile_page.dart';
 import 'components/bottom_nav_bar.dart';
+import 'package:roamie/provider/travel_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:roamie/provider/user_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
