@@ -218,6 +218,7 @@ class _TravelPlansPageState extends State<TravelPlansPage> {
 
   Widget _buildImage(TravelPlan plan) {
     if (plan.imageBase64 != null && plan.imageBase64!.isNotEmpty) {
+      //https://stackoverflow.com/questions/46145472/how-to-convert-base64-string-into-image-with-flutter
       return Image.memory(
         base64Decode(plan.imageBase64!),
         fit: BoxFit.cover,
