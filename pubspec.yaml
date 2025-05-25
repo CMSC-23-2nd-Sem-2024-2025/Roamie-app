@@ -16,8 +16,6 @@ dependencies:
   google_sign_in: ^6.2.2
   provider: ^6.1.5
   qr_flutter: ^4.0.0
-  path_provider: ^2.0.13
-  permission_handler: ^10.4.0
   qr_code_scanner_plus: ^2.0.10+1
 
 dev_dependencies:
