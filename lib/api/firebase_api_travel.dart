@@ -1,17 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../models/travel_model.dart';
 
 class FirebaseTravelAPI {
   static final FirebaseFirestore db = FirebaseFirestore.instance;
 
-  // Add new travel plan with current user as owner and in sharedWith
+  // Add travel plan with current user as owner and in sharedWith
   Future<String> addTravelPlan(Map<String, dynamic> plan) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      plan['ownerId'] = user.uid;
-      plan['sharedWith'] = [user.uid];
-    }
     try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        plan['ownerId'] = user.uid;
+        plan['sharedWith'] = [user.uid];
+      }
       await db.collection("travel_plans").add(plan);
       return "Successfully added travel plan!";
     } on FirebaseException catch (e) {
@@ -19,7 +20,7 @@ class FirebaseTravelAPI {
     }
   }
 
-  // Delete travel plan
+  // Delete plan using doc id
   Future<String> deleteTravelPlan(String id) async {
     try {
       await db.collection("travel_plans").doc(id).delete();
@@ -29,7 +30,7 @@ class FirebaseTravelAPI {
     }
   }
 
-  // Update plan
+  // Update plan using doc id and new data
   Future<String> updateTravelPlan(
       String id, Map<String, dynamic> updatedData) async {
     try {
@@ -40,31 +41,34 @@ class FirebaseTravelAPI {
     }
   }
 
-  // Get all plans where user is in sharedWith
-  Stream<QuerySnapshot> getTravelPlansByUser(String userId) {
+  // Get plans shared with current user
+  Stream<List<TravelPlan>> getTravelPlansByUser(String userId) {
     return db
         .collection("travel_plans")
         .where("sharedWith", arrayContains: userId)
-        .snapshots();
+        .snapshots()
+        .map((snap) => snap.docs.map((doc) {
+              final data = doc.data();
+              data['id'] = doc.id;
+              return TravelPlan.fromJson(data);
+            }).toList());
   }
 
-  // Share plan by username (resolves UID first)
+  // Share plan by username
   Future<String> sharePlanWithUsername(String planId, String username) async {
     try {
       final uid = await getUidByUsername(username);
       if (uid == null) return "Username not found.";
 
       final docRef = db.collection("travel_plans").doc(planId);
-      final docSnap = await docRef.get();
-      if (!docSnap.exists) return "Plan not found";
+      final doc = await docRef.get();
+      if (!doc.exists) return "Plan not found.";
 
-      List sharedWith = docSnap.get('sharedWith') ?? [];
-      if (sharedWith.contains(uid)) {
-        return "User is already shared with this plan.";
-      }
+      List sharedWith = doc.get('sharedWith') ?? [];
+      if (sharedWith.contains(uid)) return "User is already shared.";
 
       await docRef.update({
-        'sharedWith': FieldValue.arrayUnion([uid]),
+        'sharedWith': FieldValue.arrayUnion([uid])
       });
 
       return "Successfully shared travel plan with @$username!";
@@ -73,11 +77,11 @@ class FirebaseTravelAPI {
     }
   }
 
-  // Remove UID from sharedWith
+  // Remove UID from sharedWith list
   Future<String> removeSharedUser(String planId, String uid) async {
     try {
       await db.collection("travel_plans").doc(planId).update({
-        'sharedWith': FieldValue.arrayRemove([uid]),
+        'sharedWith': FieldValue.arrayRemove([uid])
       });
       return "Successfully removed shared user!";
     } catch (e) {
@@ -85,46 +89,33 @@ class FirebaseTravelAPI {
     }
   }
 
-  // Lookup UID by username (assuming username is unique in 'users' collection)
+  // Get UID from username
   Future<String?> getUidByUsername(String username) async {
     try {
-      final snapshot = await db
+      final snap = await db
           .collection("users")
           .where("username", isEqualTo: username)
-          .limit(1)
           .get();
-      if (snapshot.docs.isEmpty) return null;
-      return snapshot.docs.first.id; // User UID = doc ID
+
+      if (snap.docs.isEmpty) return null;
+      return snap.docs.first.data()['userId'];
     } catch (e) {
+      print("Error fetching UID by username: $e");
       return null;
     }
   }
 
-  // Lookup username by UID
+  // Get username from UID
   Future<String?> getUsernameByUid(String uid) async {
     try {
-      final doc = await db.collection("users").doc(uid).get();
-      if (!doc.exists) return null;
-      return doc.data()?['username'];
+      final snap =
+          await db.collection("users").where("userId", isEqualTo: uid).get();
+
+      if (snap.docs.isEmpty) return null;
+      return snap.docs.first.data()['username'];
     } catch (e) {
+      print("Error fetching username by UID: $e");
       return null;
-    }
-  }
-
-  // Optional: Clone shared plan
-  Future<String> importSharedPlan(Map<String, dynamic> planData) async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return "No signed-in user";
-
-    try {
-      planData.remove('id');
-      planData['ownerId'] = user.uid;
-      planData['sharedWith'] = [user.uid];
-
-      await db.collection("travel_plans").add(planData);
-      return "Successfully imported shared travel plan!";
-    } on FirebaseException catch (e) {
-      return "Failed to import shared plan '${e.code}': ${e.message}";
     }
   }
 }
