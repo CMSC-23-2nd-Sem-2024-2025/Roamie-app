@@ -42,6 +42,7 @@ class _TravelPlanFormScreenState extends State<TravelPlanFormScreen> {
     (widget.existing?.itinerary ?? []).forEach((item) {
       final day = item['day']!;
       _itinerary.putIfAbsent(day, () => []).add({
+        //https://api.flutter.dev/flutter/dart-core/Map/putIfAbsent.html
         'start': item['start'] ?? '',
         'end': item['end'] ?? '',
         'details': item['details'] ?? '',
@@ -428,7 +429,8 @@ class _TravelPlanFormScreenState extends State<TravelPlanFormScreen> {
     required TextEditingController controller,
     required String hint,
     IconData? suffixIcon,
-    VoidCallback? onSuffixTap,
+    VoidCallback?
+        onSuffixTap, //https://api.flutter.dev/flutter/dart-ui/VoidCallback.html https://api.flutter.dev/flutter/cupertino/CupertinoSearchTextField/onSuffixTap.html
   }) {
     return TextFormField(
       controller: controller,
