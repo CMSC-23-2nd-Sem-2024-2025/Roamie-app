@@ -1,118 +1,76 @@
+// Joshua O. Pagcaliwagan CMSC 23 CD5L Exer 9 Travel Plan Provider
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 import '../api/firebase_api_travel.dart';
 import '../models/travel_model.dart';
 
-class TravelProvider extends ChangeNotifier {
-  final FirebaseTravelAPI _travelAPI = FirebaseTravelAPI();
-
+class TravelProvider with ChangeNotifier {
+  final FirebaseTravelAPI _api = FirebaseTravelAPI();
   List<TravelPlan> _plans = [];
   List<TravelPlan> get plans => _plans;
 
-  StreamSubscription? _travelSub;
+  StreamSubscription? _sub;
 
+  //get current userId
   String? get currentUserId => FirebaseAuth.instance.currentUser?.uid;
 
-  // Listen to current user's travel plans (owned and shared)
+  //listen to user’s travel plans
   Future<void> fetchTravelPlans() async {
-    final userId = currentUserId;
-    if (userId == null) return;
+    final uid = currentUserId;
+    if (uid == null) return;
 
-    _travelSub?.cancel();
-
-    _travelSub = _travelAPI.getTravelPlansByUser(userId).listen((snapshot) {
-      _plans = snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        data['id'] = doc.id;
-        return TravelPlan.fromJson(data);
-      }).toList();
+    _sub?.cancel();
+    _sub = _api.getTravelPlansByUser(uid).listen((list) {
+      _plans = list;
       notifyListeners();
     });
   }
 
-  // Add a new travel plan
+  //add plan
   Future<String> addTravelPlan(TravelPlan plan) async {
-    final result = await _travelAPI.addTravelPlan(plan.toJson());
+    final res = await _api.addTravelPlan(plan.toJson());
     await fetchTravelPlans();
-    return result;
+    return res;
   }
 
-  // Delete a travel plan by ID
+  //delete plan
   Future<String> deleteTravelPlan(String id) async {
-    final result = await _travelAPI.deleteTravelPlan(id);
+    final res = await _api.deleteTravelPlan(id);
     await fetchTravelPlans();
-    return result;
+    return res;
   }
 
-  // Update an existing travel plan
-  Future<String> updateTravelPlan(String id, TravelPlan updatedPlan) async {
-    final result = await _travelAPI.updateTravelPlan(id, updatedPlan.toJson());
+  //update plan
+  Future<String> updateTravelPlan(String id, TravelPlan plan) async {
+    final res = await _api.updateTravelPlan(id, plan.toJson());
     await fetchTravelPlans();
-    return result;
+    return res;
   }
 
-  // Share a travel plan with another user by their username (calls API to resolve username -> uid)
-  Future<String> sharePlanWithUser(String planId, String username) async {
-    final result = await _travelAPI.sharePlanWithUsername(planId, username);
+  //share plan by username
+  Future<String> sharePlanWithUser(String id, String username) async {
+    final res = await _api.sharePlanWithUsername(id, username);
     await fetchTravelPlans();
-    return result;
+    return res;
   }
 
-  // Remove a shared user from a travel plan (by UID)
-  Future<String> removeSharedUser(String planId, String userIdToRemove) async {
-    final result = await _travelAPI.removeSharedUser(planId, userIdToRemove);
+  //remove shared user
+  Future<String> removeSharedUser(String id, String uid) async {
+    final res = await _api.removeSharedUser(id, uid);
     await fetchTravelPlans();
-    return result;
+    return res;
   }
 
-  // Import a shared plan by adding current user to sharedWith list
-  // Note: takes plan data and current username (or can be userId), you can adjust accordingly
-  Future<String> importSharedPlan(
-      Map<String, dynamic> planData, String username) async {
-    final userId = currentUserId;
-    if (userId == null) return 'No user logged in';
-
-    final planId = planData['id'];
-    if (planId == null) return 'Invalid plan data';
-
-    // Shares plan with current user using username
-    final result = await _travelAPI.sharePlanWithUsername(planId, username);
-    await fetchTravelPlans();
-    return result;
-  }
-
-  // Get username from UID
+  //get username from UID via API method
   Future<String?> getUsernameFromUid(String uid) async {
-    final userDoc =
-        await FirebaseTravelAPI.db.collection('users').doc(uid).get();
-    if (!userDoc.exists) return null;
-    return userDoc.data()?['username'] as String?;
-  }
-
-  // Refresh a specific plan's data from Firestore
-  Future<void> reloadPlan(String planId) async {
-    final userId = currentUserId;
-    if (userId == null) return;
-
-    final snapshot =
-        await FirebaseTravelAPI.db.collection('travel_plans').doc(planId).get();
-
-    if (snapshot.exists) {
-      final data = snapshot.data() as Map<String, dynamic>;
-      data['id'] = snapshot.id;
-      final updatedPlan = TravelPlan.fromJson(data);
-      final idx = _plans.indexWhere((p) => p.id == planId);
-      if (idx >= 0) {
-        _plans[idx] = updatedPlan;
-        notifyListeners();
-      }
-    }
+    return await _api.getUsernameByUid(uid);
   }
 
   @override
   void dispose() {
-    _travelSub?.cancel();
+    _sub?.cancel();
     super.dispose();
   }
 }
