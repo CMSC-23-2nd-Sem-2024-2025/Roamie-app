@@ -5,12 +5,12 @@ class TravelPlan {
   String startDate; // Format: YYYY-MM-DD
   String endDate; // Format: YYYY-MM-DD
   String notes;
-  // Optional image stored as URL (uploaded via Firebase Storage)
-  String? imageUrl;
-  // ownerId = UID of the user who created the plan
+  String? imageBase64; // Optional: base64 image data
   String ownerId;
-  // sharedWith = list of usernames or UIDs the plan is shared with
   List<String>? sharedWith;
+
+  // Each itinerary entry can include day and detailed activities
+  List<Map<String, String>> itinerary;
 
   TravelPlan({
     this.id,
@@ -19,9 +19,10 @@ class TravelPlan {
     required this.startDate,
     required this.endDate,
     required this.notes,
-    this.imageUrl,
+    this.imageBase64,
     required this.ownerId,
     this.sharedWith,
+    this.itinerary = const [],
   });
 
   factory TravelPlan.fromJson(Map<String, dynamic> json) {
@@ -32,9 +33,13 @@ class TravelPlan {
       startDate: json['startDate'],
       endDate: json['endDate'],
       notes: json['notes'],
-      imageUrl: json['imageUrl'],
+      imageBase64: json['imageBase64'],
       ownerId: json['ownerId'],
       sharedWith: List<String>.from(json['sharedWith'] ?? []),
+      itinerary: (json['itinerary'] as List?)
+              ?.map((e) => Map<String, String>.from(e))
+              .toList() ??
+          [],
     );
   }
 
@@ -45,9 +50,10 @@ class TravelPlan {
       'startDate': startDate,
       'endDate': endDate,
       'notes': notes,
-      'imageUrl': imageUrl,
+      'imageBase64': imageBase64,
       'ownerId': ownerId,
       'sharedWith': sharedWith ?? [],
+      'itinerary': itinerary,
     };
   }
 }
