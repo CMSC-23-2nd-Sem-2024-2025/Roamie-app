@@ -1,10 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
-import 'dart:ui' as ui;
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -86,31 +81,30 @@ class DetailsScreen extends StatelessWidget {
       }
     }
 
-    Future<void> generateAndSaveQR() async {
-      final qrData = jsonEncode({'planId': plan.id});
-      final qrPainter = QrPainter(
-        data: qrData,
-        version: QrVersions.auto,
-        gapless: false,
+    void showQrDialog(BuildContext context, String planId) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('QR Code'),
+          content: SizedBox(
+            width: 200,
+            height: 200,
+            child: Center(
+              child: QrImageView(
+                data: planId, // You can also use jsonEncode({'planId': planId})
+                version: QrVersions.auto,
+                size: 200.0,
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Close'),
+            ),
+          ],
+        ),
       );
-      final ui.Image qrImage = await qrPainter.toImage(300);
-      final byteData = await qrImage.toByteData(format: ui.ImageByteFormat.png);
-      final pngBytes = byteData!.buffer.asUint8List();
-
-      final status = await Permission.storage.request();
-      if (status.isGranted) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('QR code saved to gallery')),
-          );
-        }
-      } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Permission denied')),
-          );
-        }
-      }
     }
 
     Future<void> scanQR() async {
@@ -127,7 +121,6 @@ class DetailsScreen extends StatelessWidget {
                 key: qrKey,
                 onQRViewCreated: (controller) {
                   controller.scannedDataStream.listen((scanData) async {
-                    // Don't dispose controller here
                     final data = jsonDecode(scanData.code ?? '{}');
                     final sharedPlanId = data['planId'];
 
@@ -154,7 +147,7 @@ class DetailsScreen extends StatelessWidget {
                     final planData = planDoc.data() as Map<String, dynamic>;
                     planData['id'] = planDoc.id;
 
-                    // Get current username (you might need a method in your provider or from Firestore)
+                    // Get current username
                     final currentUserId = provider.currentUserId;
                     if (currentUserId == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -172,9 +165,6 @@ class DetailsScreen extends StatelessWidget {
                       );
                       return;
                     }
-
-                    // Now import the plan properly
-                    await provider.importSharedPlan(planData, username);
 
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -208,10 +198,10 @@ class DetailsScreen extends StatelessWidget {
               ),
               ListTile(
                 leading: const Icon(Icons.qr_code),
-                title: const Text('Generate & save QR code'),
+                title: const Text('Show QR code'),
                 onTap: () {
                   Navigator.pop(context);
-                  generateAndSaveQR();
+                  showQrDialog(context, plan.id!);
                 },
               ),
               ListTile(
@@ -230,7 +220,7 @@ class DetailsScreen extends StatelessWidget {
 
     Future<String> getUsername(String uid) async {
       // Implement or call provider method to fetch username by uid.
-      return await provider.getUsernameFromUid(uid) ?? 'Unknown user';
+      return await provider.getUsernameFromUid(uid) ?? 'Unknown User';
     }
 
     Widget buildCoverImage() {
@@ -373,7 +363,7 @@ class DetailsScreen extends StatelessWidget {
                     }),
                   ],
 
-                  // --- Your added "Shared With" section below ---
+                  // Shared With Section
                   if (plan.ownerId == currentUser &&
                       (plan.sharedWith?.isNotEmpty ?? false)) ...[
                     const SizedBox(height: 24),
@@ -387,11 +377,28 @@ class DetailsScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     ...plan.sharedWith!.map((uid) {
-                      // Use FutureBuilder to asynchronously get username from uid
                       return FutureBuilder<String>(
                         future: getUsername(uid),
                         builder: (context, snapshot) {
-                          final username = snapshot.data ?? 'Loading...';
+                          // While loading, just show loading text
+                          if (snapshot.connectionState !=
+                              ConnectionState.done) {
+                            return Card(
+                              child: ListTile(
+                                title: Text('Loading...'),
+                              ),
+                            );
+                          }
+
+                          final username = snapshot.data ?? 'Unknown';
+
+                          // Check if this uid is owner
+                          if (uid == currentUser) {
+                            // Return empty widget to exclude owner from the list
+                            return const SizedBox.shrink();
+                          }
+
+                          // Otherwise build the normal card
                           return Card(
                             child: ListTile(
                               title: Text(username),
@@ -420,7 +427,6 @@ class DetailsScreen extends StatelessWidget {
                                   if (confirm == true) {
                                     await provider.removeSharedUser(
                                         plan.id!, uid);
-                                    await provider.reloadPlan(plan.id!);
                                     if (context.mounted) {
                                       ScaffoldMessenger.of(context)
                                           .showSnackBar(SnackBar(
