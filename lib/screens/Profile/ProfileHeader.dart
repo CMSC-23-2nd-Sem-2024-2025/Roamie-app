@@ -55,54 +55,28 @@ class _ProfileHeaderState extends State<ProfileHeader> {
   // Pick Image for profile picture
   Future<void> _pickImage() async {
   final userProvider = Provider.of<UserProvider>(context, listen: false);
-  final userId = userProvider.userId;
+  final userId = userProvider.userId; 
 
-  if (userId == null || userId.isEmpty) return;
+  if (userId == null) {
+    return;
+  }
 
-  showModalBottomSheet(
-    context: context,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
-    builder: (BuildContext context) {
-      return SafeArea(
-        child: Wrap(
-          children: <Widget>[
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Choose from Gallery'),
-              onTap: () async {
-                Navigator.of(context).pop();
-                final XFile? pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-                if (pickedFile != null) await _updateImage(pickedFile, userId, userProvider);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: const Text('Take a Photo'),
-              onTap: () async {
-                Navigator.of(context).pop();
-                final XFile? pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
-                if (pickedFile != null) await _updateImage(pickedFile, userId, userProvider);
-              },
-            ),
-          ],
-        ),
-      );
-    },
-  );
-}
+  final ImagePicker picker = ImagePicker();
+  final XFile? pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-Future<void> _updateImage(XFile pickedFile, String userId, UserProvider userProvider) async {
-  final Uint8List bytes = await pickedFile.readAsBytes();
-  setState(() {
-    _image = bytes;
-  });
+  if (pickedFile != null) {
+    final Uint8List bytes = await pickedFile.readAsBytes();
+    setState(() {
+      _image = bytes;
+    });
 
-  final String base64Image = base64Encode(bytes);
-  await userProvider.updateUser(userId, {
-    'profilePicture': base64Image,
-  });
+    // Encode the image bytes to base64 string to save in Firestore.
+    String base64Image = base64Encode(bytes);
+
+    // Update user document with profile picture
+   await userProvider.updateUser(userId, {'profilePicture': base64Image});
+
+  }
 }
 
 @override
