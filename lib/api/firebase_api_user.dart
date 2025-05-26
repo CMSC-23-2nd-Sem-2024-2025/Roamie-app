@@ -95,45 +95,67 @@ class FirebaseUserAPI {
     }
   }
 
-  // Get pending friend requests (received)
+  // Get pending friend requests (received) - FIXED VERSION
   Future<List<Map<String, dynamic>>> getPendingFriendRequests(String userId) async {
     try {
+      print('Getting pending friend requests for userId: $userId');
+      
       final userQuery = await db.collection('users')
           .where('userId', isEqualTo: userId)
           .get();
       
       if (userQuery.docs.isEmpty) {
+        print('User document not found for userId: $userId');
         return [];
       }
 
       final userDocId = userQuery.docs.first.id;
+      print('Found user document ID: $userDocId');
+      
+      // Get all pending requests in this user's friends subcollection
       final requestsSnapshot = await db.collection('users')
           .doc(userDocId)
           .collection('friends')
           .where('status', isEqualTo: 'pending')
-          .where('requestedBy', isNotEqualTo: userId) // Requests not sent by current user
           .get();
+
+      print('Found ${requestsSnapshot.docs.length} pending friend documents');
 
       List<Map<String, dynamic>> requests = [];
       
       for (var requestDoc in requestsSnapshot.docs) {
-        final requesterUserId = requestDoc.data()['userId'];
+        final requestData = requestDoc.data();
+        final requestedBy = requestData['requestedBy'];
+        final friendUserId = requestData['userId'];
         
-        // Get requester's user info
-        final requesterQuery = await db.collection('users')
-            .where('userId', isEqualTo: requesterUserId)
-            .get();
+        print('Processing request: requestedBy=$requestedBy, friendUserId=$friendUserId, currentUserId=$userId');
         
-        if (requesterQuery.docs.isNotEmpty) {
-          final requesterData = requesterQuery.docs.first.data();
-          requests.add({
-            'userId': requesterUserId,
-            'userData': requesterData,
-            'requestData': requestDoc.data(),
-          });
+        // Only include requests that were NOT sent by the current user
+        // (i.e., requests received by the current user)
+        if (requestedBy != userId) {
+          // Get requester's user info
+          final requesterQuery = await db.collection('users')
+              .where('userId', isEqualTo: friendUserId)
+              .get();
+          
+          if (requesterQuery.docs.isNotEmpty) {
+            final requesterData = requesterQuery.docs.first.data();
+            print('Adding request from user: ${requesterData['firstName']} ${requesterData['lastName']}');
+            
+            requests.add({
+              'userId': friendUserId,
+              'userData': requesterData,
+              'requestData': requestData,
+            });
+          } else {
+            print('Requester user data not found for userId: $friendUserId');
+          }
+        } else {
+          print('Skipping request sent by current user');
         }
       }
 
+      print('Returning ${requests.length} pending friend requests');
       return requests;
     } catch (e) {
       print('Error getting pending friend requests: $e');
@@ -144,6 +166,8 @@ class FirebaseUserAPI {
   // Send friend request
   Future<String> sendFriendRequest(String currentUserId, String targetUserId, Map<String, dynamic> currentUserData) async {
     try {
+      print('Sending friend request from $currentUserId to $targetUserId');
+      
       // Get both users' document IDs
       final currentUserQuery = await db.collection('users')
           .where('userId', isEqualTo: currentUserId)
@@ -190,8 +214,10 @@ class FirebaseUserAPI {
       });
 
       await batch.commit();
+      print('Friend request sent successfully');
       return 'Friend request sent successfully';
     } catch (e) {
+      print('Error sending friend request: $e');
       return 'Error sending friend request: $e';
     }
   }
