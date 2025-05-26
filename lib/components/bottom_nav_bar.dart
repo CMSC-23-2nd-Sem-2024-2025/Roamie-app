@@ -50,7 +50,9 @@ class BottomNavBar extends StatelessWidget {
       items: [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Travels'),
         BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Find'),
-        BottomNavigationBarItem(icon: profileIcon, label: 'Profile'),
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Friends'),
+        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+
       ],
     );
   }
