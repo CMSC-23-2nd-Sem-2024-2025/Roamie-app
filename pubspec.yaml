@@ -16,8 +16,14 @@ dependencies:
   google_sign_in: ^6.2.2
   provider: ^6.1.5
   qr_flutter: ^4.0.0
+  path_provider: ^2.0.13
+  permission_handler: ^10.4.0
   qr_code_scanner_plus: ^2.0.10+1
-  flutter_launcher_icons: ^0.14.3
+  image_gallery_saver: ^2.0.3
+  flutter_local_notifications: ^17.1.2
+  timezone: ^0.9.2
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -28,8 +34,6 @@ flutter:
     # Google Sign-in assets: https://developers.google.com/identity/branding-guidelines
     - lib/assets/sign-in/
     - lib/assets/placeholder.jpg
-    - lib/assets/default_profilepic_roamie.png
-    - lib/assets/icon/roamie_launcher.png
   fonts:
   # Font source: https://fonts.google.com/specimen/Poppins
     - family: Poppins
