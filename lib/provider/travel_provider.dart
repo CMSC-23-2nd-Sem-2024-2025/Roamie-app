@@ -23,7 +23,7 @@ class TravelProvider with ChangeNotifier {
 
     _sub?.cancel();
     _sub = _api.getTravelPlansByUser(uid).listen((list) {
-      _plans = list;
+      //_plans = list;
       notifyListeners();
     });
   }
