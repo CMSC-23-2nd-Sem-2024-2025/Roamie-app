@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +5,7 @@ import 'package:roamie/provider/user_provider.dart';
 import 'package:roamie/screens/Profile/edit_button.dart';
 import 'ProfileHeader.dart';
 import 'list_grid.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -71,14 +71,23 @@ class _ProfilePageState extends State<ProfilePage>{
                       profilePictureBase64: profilePictureBase64,
                       canEdit: true,
                     ),
-                      EditControls(
-                        username: username,
-                        userId: userId!,
-                        name: name,
-                        interests: interests,
-                        travelStyles: travelStyles,
-                        isVisible: isVisible,
+                    // Edit and Sign Out buttons in a row
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          EditControls(
+                            username: username,
+                            userId: userId!,
+                            name: name,
+                            interests: interests,
+                            travelStyles: travelStyles,
+                            isVisible: isVisible,
+                          ),
+                        ],
                       ),
+                    ),
 
                     const SizedBox(height: 20), 
                     // Label for Interests
@@ -107,6 +116,25 @@ class _ProfilePageState extends State<ProfilePage>{
                       ),
                     ),
                     styleGrid(travelStyles),
+                    // Add sign out button at the bottom
+                    const SizedBox(height: 32),
+                    TextButton(
+                      onPressed: () async {
+                        await FirebaseAuth.instance.signOut();
+                        if (context.mounted) {
+                          Navigator.of(context).pushNamedAndRemoveUntil('/signin', (route) => false);
+                        }
+                      },
+                      child: const Text(
+                        'Sign Out',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
