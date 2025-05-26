@@ -1,13 +1,14 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:roamie/api/firebase_api_travel.dart';
 import 'package:roamie/firebase_options.dart';
 import 'screens/sign_in_page.dart';
 import 'screens/sign_up_page.dart';
 import 'screens/travel_plans_page.dart';
 import 'screens/find_similar_people_page.dart';
 import 'screens/profile_page.dart';
-import 'components/bottom_nav_bar.dart';
 import 'package:roamie/provider/travel_provider.dart';
+import 'components/bottom_nav_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:roamie/provider/user_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -16,6 +17,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await NotificationsService.init(); 
 
   runApp(
     MultiProvider(
@@ -81,11 +83,10 @@ class _HomePageState extends State<HomePage> {
 
     // Fetch profilePicture to pass to Nav Bar Profile Icon
     return StreamBuilder<DocumentSnapshot>(
-      stream:
-          FirebaseFirestore.instance
-              .collection('users')
-              .doc(userId)
-              .snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .snapshots(),
       builder: (context, snapshot) {
         String? profilePictureBase64;
         String? profilePictureUrl;
