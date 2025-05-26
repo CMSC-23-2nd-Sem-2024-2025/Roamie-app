@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:roamie/widgets/profile_picture_widget.dart';
 import 'package:roamie/api/firebase_api_user.dart';
+import 'package:roamie/screens/Profile/friend_profile_page.dart';
 
 class FriendsListPage extends StatefulWidget {
   const FriendsListPage({super.key});
@@ -76,7 +77,15 @@ class _FriendsListPageState extends State<FriendsListPage> with SingleTickerProv
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.red.shade300,
+              foregroundColor: Colors.white,
+              side: BorderSide(color: Colors.red.shade700),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            ),
             child: const Text('Remove'),
           ),
         ],
@@ -147,6 +156,8 @@ class _FriendsListPageState extends State<FriendsListPage> with SingleTickerProv
               final friend = friends[index];
               final userData = friend['userData'];
               final friendshipData = friend['friendshipData'];
+              final friendUserId = userData['userId'];
+              final friendName = '${userData['firstName'] ?? ''} ${userData['lastName'] ?? ''}';
 
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -154,12 +165,14 @@ class _FriendsListPageState extends State<FriendsListPage> with SingleTickerProv
                   leading: ProfilePictureWidget(
                     profilePicture: userData['profilePicture'],
                   ),
-                  title: Text('${userData['firstName'] ?? ''} ${userData['lastName'] ?? ''}'),
+                  title: Text(friendName),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       if (userData['email'] != null)
                         Text(userData['email']),
+                      if (userData['username'] != null && userData['username'].isNotEmpty)
+                        Text('@${userData['username']}'),
                       if (friendshipData['acceptedAt'] != null)
                         Text(
                           'Friends since ${_formatDate(friendshipData['acceptedAt'])}',
@@ -180,13 +193,21 @@ class _FriendsListPageState extends State<FriendsListPage> with SingleTickerProv
                             Text('Remove Friend'),
                           ],
                         ),
-                        onTap: () => _removeFriend(
-                          userData['userId'],
-                          '${userData['firstName'] ?? ''} ${userData['lastName'] ?? ''}',
-                        ),
+                        onTap: () => _removeFriend(friendUserId, friendName),
                       ),
                     ],
                   ),
+                  onTap: () {
+                    // Navigate to FriendProfilePage when tapped
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FriendProfilePage(
+                          friendUserId: friendUserId,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               );
             },
@@ -250,77 +271,98 @@ class _FriendsListPageState extends State<FriendsListPage> with SingleTickerProv
 
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          ProfilePictureWidget(
-                            profilePicture: userData['profilePicture'],
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${userData['firstName'] ?? ''} ${userData['lastName'] ?? ''}',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+                child: InkWell(
+                  onTap: () {
+                    // Navigate to FriendProfilePage when tapped
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => FriendProfilePage(
+                          friendUserId: userData['userId'],
+                        ),
+                      ),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            ProfilePictureWidget(
+                              profilePicture: userData['profilePicture'],
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${userData['firstName'] ?? ''} ${userData['lastName'] ?? ''}',
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
+                                  if (userData['email'] != null)
+                                    Text(
+                                      userData['email'],
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  if (userData['username'] != null && userData['username'].isNotEmpty)
+                                    Text(
+                                      '@${userData['username']}',
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  if (requestData['requestedAt'] != null)
+                                    Text(
+                                      'Sent ${_formatDate(requestData['requestedAt'])}',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey[500],
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: () => _acceptFriendRequest(userData['userId']),
+                                icon: const Icon(Icons.check),
+                                label: const Text('Accept'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  foregroundColor: Colors.white,
                                 ),
-                                if (userData['email'] != null)
-                                  Text(
-                                    userData['email'],
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                if (requestData['requestedAt'] != null)
-                                  Text(
-                                    'Sent ${_formatDate(requestData['requestedAt'])}',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey[500],
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () => _acceptFriendRequest(userData['userId']),
-                              icon: const Icon(Icons.check),
-                              label: const Text('Accept'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green,
-                                foregroundColor: Colors.white,
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: () => _rejectFriendRequest(userData['userId']),
-                              icon: const Icon(Icons.close),
-                              label: const Text('Reject'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red,
-                                foregroundColor: Colors.white,
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                onPressed: () => _rejectFriendRequest(userData['userId']),
+                                icon: const Icon(Icons.close),
+                                label: const Text('Reject'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                  foregroundColor: Colors.white,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
