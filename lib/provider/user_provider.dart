@@ -70,11 +70,4 @@ class UserProvider with ChangeNotifier {
       }
     }
   }
-
-  Future<void> removeFriend(String friendUserId) async {
-    if (currentUserDocumentId == null) return;
-    final result = await firebaseService.removeFriend(currentUserDocumentId!, friendUserId);
-    print(result);
-
-  }
 }
