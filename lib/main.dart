@@ -74,28 +74,18 @@ class _HomePageState extends State<HomePage> {
     }
 
     // Fetch profilePicture to pass to Nav Bar Profile Icon
-    return StreamBuilder<DocumentSnapshot>(
-      stream:
-          FirebaseFirestore.instance
-              .collection('users')
-              .doc(userId)
-              .snapshots(),
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .where('userId', isEqualTo: userId)
+          .snapshots(),
       builder: (context, snapshot) {
-        String? profilePictureBase64;
-        String? profilePictureUrl;
+        String? profilePicture;
 
-        if (snapshot.hasData && snapshot.data!.exists) {
-          final data = snapshot.data!.data() as Map<String, dynamic>?;
+        if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+          final data = snapshot.data!.docs.first.data() as Map<String, dynamic>?;
           if (data != null && data.containsKey('profilePicture')) {
-            final profilePicture = data['profilePicture'];
-            if (profilePicture != null && profilePicture is String) {
-              if (profilePicture.startsWith('http') ||
-                  profilePicture.startsWith('https')) {
-                profilePictureUrl = profilePicture;
-              } else {
-                profilePictureBase64 = profilePicture;
-              }
-            }
+            profilePicture = data['profilePicture'];
           }
         }
 
@@ -104,8 +94,7 @@ class _HomePageState extends State<HomePage> {
           bottomNavigationBar: BottomNavBar(
             currentIndex: _selectedIndex,
             onTap: _onItemTapped,
-            profilePictureBase64: profilePictureBase64,
-            profilePictureUrl: profilePictureUrl,
+            profilePicture: profilePicture,
           ),
         );
       },
