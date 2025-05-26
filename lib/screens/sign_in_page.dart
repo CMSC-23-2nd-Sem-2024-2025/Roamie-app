@@ -259,7 +259,7 @@ class _SignInPageState extends State<SignInPage> {
                 // App icon
                 Image.asset(
                   'lib/assets/icon/roamie_launcher.png',
-                  height: 145, // Adjust size as needed
+                  height: 145,
                   width: 145,
                 ),
                 // ROAMIE title
