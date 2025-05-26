@@ -3,8 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:roamie/api/firebase_api_travel.dart';
 import '../models/travel_model.dart';
 import '../provider/travel_provider.dart';
+
 
 class TravelPlanFormScreen extends StatefulWidget {
   final TravelPlan? existing;
@@ -24,6 +26,7 @@ class _TravelPlanFormScreenState extends State<TravelPlanFormScreen> {
 
   String? _base64Image;
   Map<String, List<Map<String, String>>> _itinerary = {};
+  String? _notificationPreference;
 
   @override
   void initState() {
@@ -48,6 +51,7 @@ class _TravelPlanFormScreenState extends State<TravelPlanFormScreen> {
         'details': item['details'] ?? '',
       });
     });
+  
   }
 
   @override
@@ -193,7 +197,9 @@ class _TravelPlanFormScreenState extends State<TravelPlanFormScreen> {
     );
   }
 
+
   void _savePlan() async {
+
     if (_formKey.currentState!.validate()) {
       DateTime now = DateTime.now();
       DateTime? start = DateTime.tryParse(_startDateCtrl.text);
@@ -208,6 +214,7 @@ class _TravelPlanFormScreenState extends State<TravelPlanFormScreen> {
         return;
       }
 
+
       for (var day in _itinerary.keys) {
         final date = DateTime.tryParse(day);
         if (date == null || date.isBefore(start) || date.isAfter(end)) {
@@ -217,6 +224,8 @@ class _TravelPlanFormScreenState extends State<TravelPlanFormScreen> {
           return;
         }
       }
+      int? notificationDays= _notificationPreference!= null ? int.tryParse(_notificationPreference!) : null;
+
 
       // Flatten itinerary
       final flatItinerary = _itinerary.entries.expand((e) {
@@ -242,6 +251,7 @@ class _TravelPlanFormScreenState extends State<TravelPlanFormScreen> {
         sharedWith: widget.existing?.sharedWith ?? [],
         imageBase64: _base64Image ?? widget.existing?.imageBase64,
         itinerary: flatItinerary,
+        notificationDays: notificationDays,
       );
 
       final travelProvider = context.read<TravelProvider>();
@@ -250,12 +260,26 @@ class _TravelPlanFormScreenState extends State<TravelPlanFormScreen> {
         await travelProvider.addTravelPlan(plan);
       } else {
         await travelProvider.updateTravelPlan(plan.id!, plan);
-        if (!mounted) return;
-        Navigator.pop(context); // close edit
+
+        // if (!mounted) return;
+        // Navigator.pop(context); // close edit
+      }
+      if (notificationDays != null) {
+      await NotificationsService.scheduleNotification(
+        id: plan.id!,
+        title: plan.place,
+        travelDate: start,
+        daysBefore: notificationDays,
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Notification scheduled $notificationDays day(s) before your trip')),
+        );
       }
 
-      if (!mounted) return;
-      Navigator.pop(context); // go back
+    }
+    if (!mounted) return;
+    Navigator.pop(context); // go back
     }
   }
 
@@ -375,6 +399,17 @@ class _TravelPlanFormScreenState extends State<TravelPlanFormScreen> {
                   ],
                 );
               }),
+              const SizedBox(height:20),
+              _label("Notify Me"),
+              DropdownButtonFormField<String>(
+                value: _notificationPreference,
+                items: const[DropdownMenuItem(value: null, child: Text("None")),DropdownMenuItem(value: "1", child: Text("1 day before")),DropdownMenuItem(value: "3", child: Text("3 days before")),DropdownMenuItem(value: "7", child: Text("1 week before")),],
+                onChanged: (value){
+                  setState(()=> _notificationPreference=value);
+                },
+                decoration: InputDecoration(filled: true, fillColor: Colors.grey.shade200, contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)), focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8),borderSide: const BorderSide(color: Colors.white),),
+                ),
+              ),
               const SizedBox(height: 10),
               Center(
                 child: ElevatedButton.icon(
