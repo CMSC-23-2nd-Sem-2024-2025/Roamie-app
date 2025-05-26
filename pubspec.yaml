@@ -3,7 +3,7 @@ description: "Find your roaming buddy."
 publish_to: 'none'
 version: 1.0.0+1
 environment:
-  sdk: ^3.7.2
+  sdk: '>=3.5.0 <4.0.0' # trigger rebuild
 dependencies:
   flutter:
     sdk: flutter
@@ -13,8 +13,10 @@ dependencies:
   image_picker: ^1.1.2
   image: ^4.5.4
   firebase_auth: ^5.5.3
-  google_sign_in: ^6.3.0
+  google_sign_in: ^6.2.2
   provider: ^6.1.5
+  qr_flutter: ^4.0.0
+  qr_code_scanner_plus: ^2.0.10+1
   flutter_launcher_icons: ^0.14.3
 dev_dependencies:
   flutter_test:
@@ -25,6 +27,7 @@ flutter:
   assets:
     # Google Sign-in assets: https://developers.google.com/identity/branding-guidelines
     - lib/assets/sign-in/
+    - lib/assets/placeholder.jpg
     - lib/assets/default_profilepic_roamie.png
     - lib/assets/icon/roamie_launcher.png
   fonts:
