@@ -1,12 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:roamie/firebase_options.dart';
+import 'package:roamie/screens/Profile/user_friend_page.dart';
 import 'screens/sign_in_page.dart';
 import 'screens/sign_up_page.dart';
 import 'screens/travel_plans_page.dart';
 import 'screens/find_similar_people_page.dart';
-import 'screens/profile_page.dart';
-import 'screens/friend_list_page.dart';
+import 'screens/Profile/profile_page.dart';
 import 'components/bottom_nav_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:roamie/provider/user_provider.dart';
@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> _screens = [
     const TravelPlansPage(),
     const FindSimilarPeoplePage(),
-    const FriendsListPage(),
+    const FriendsPage(),
     const ProfilePage(),
   ];
 

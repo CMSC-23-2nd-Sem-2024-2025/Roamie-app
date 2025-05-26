@@ -13,6 +13,8 @@ class UserProvider with ChangeNotifier {
   String? _userId;
   Map<String, dynamic>? _currentUser;
   Stream<QuerySnapshot>? _userStream;
+  String? _currentUserDocumentId;
+  String? get currentUserDocumentId => _currentUserDocumentId;
 
   // Public getter for userId
   String? get userId => _userId;
@@ -22,6 +24,7 @@ class UserProvider with ChangeNotifier {
     _userId = FirebaseAuth.instance.currentUser?.uid;
     if (_userId != null) {
       getUser(_userId!);
+      loadCurrentUserDocumentId();
     }
   }
   
@@ -51,5 +54,27 @@ class UserProvider with ChangeNotifier {
     String message = await firebaseService.updateUserByUserId(userId, data);
     print(message);
     notifyListeners();
+  }
+
+  Future<void> loadCurrentUserDocumentId() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .where('userId', isEqualTo: user.uid)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        _currentUserDocumentId = snapshot.docs.first.id;
+        notifyListeners();
+      }
+    }
+  }
+
+  Future<void> removeFriend(String friendUserId) async {
+    if (currentUserDocumentId == null) return;
+    final result = await firebaseService.removeFriend(currentUserDocumentId!, friendUserId);
+    print(result);
+
   }
 }

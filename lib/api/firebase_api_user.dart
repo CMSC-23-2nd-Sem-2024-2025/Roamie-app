@@ -14,6 +14,7 @@ class FirebaseUserAPI {
       return "Failed with error '${e.code}': ${e.message}";
     }
    }
+   
 
   // Editing Function
   Future<String> updateUserByUserId(String userId, Map<String, dynamic> data) async {
@@ -26,12 +27,11 @@ class FirebaseUserAPI {
       return 'No user found with userId: $userId';
     }
 
-    // Assuming only one document matches:
     final docId = querySnapshot.docs.first.id;
 
     await db.collection('users').doc(docId).update(data);
 
-    return 'User updated successfully';
+    return 'User updated successfully'; 
   } catch (e) {
     return 'Failed to update user: $e';
   }
@@ -42,6 +42,7 @@ class FirebaseUserAPI {
     return db.collection('users').where('userId', isEqualTo: userId).snapshots(); 
   }
 
+  
    // Fetch all users
   Stream<QuerySnapshot> getAllUsers() {
     return db.collection('users').snapshots();
