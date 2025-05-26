@@ -6,8 +6,9 @@ import 'screens/sign_in_page.dart';
 import 'screens/sign_up_page.dart';
 import 'screens/travel_plans_page.dart';
 import 'screens/find_similar_people_page.dart';
-import 'screens/profile_page.dart';
 import 'package:roamie/provider/travel_provider.dart';
+import 'screens/Profile/profile_page.dart';
+import 'screens/friend_list_page.dart';
 import 'components/bottom_nav_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:roamie/provider/user_provider.dart';
@@ -64,6 +65,7 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> _screens = [
     const TravelPlansPage(),
     const FindSimilarPeoplePage(),
+    const FriendsListPage(), // Fixed: Changed from FriendsPage to FriendsListPage
     const ProfilePage(),
   ];
 
@@ -82,27 +84,18 @@ class _HomePageState extends State<HomePage> {
     }
 
     // Fetch profilePicture to pass to Nav Bar Profile Icon
-    return StreamBuilder<DocumentSnapshot>(
+    return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('users')
-          .doc(userId)
+          .where('userId', isEqualTo: userId)
           .snapshots(),
       builder: (context, snapshot) {
-        String? profilePictureBase64;
-        String? profilePictureUrl;
+        String? profilePicture;
 
-        if (snapshot.hasData && snapshot.data!.exists) {
-          final data = snapshot.data!.data() as Map<String, dynamic>?;
+        if (snapshot.hasData && snapshot.data!.docs.isNotEmpty) {
+          final data = snapshot.data!.docs.first.data() as Map<String, dynamic>?;
           if (data != null && data.containsKey('profilePicture')) {
-            final profilePicture = data['profilePicture'];
-            if (profilePicture != null && profilePicture is String) {
-              if (profilePicture.startsWith('http') ||
-                  profilePicture.startsWith('https')) {
-                profilePictureUrl = profilePicture;
-              } else {
-                profilePictureBase64 = profilePicture;
-              }
-            }
+            profilePicture = data['profilePicture'];
           }
         }
 
@@ -111,8 +104,7 @@ class _HomePageState extends State<HomePage> {
           bottomNavigationBar: BottomNavBar(
             currentIndex: _selectedIndex,
             onTap: _onItemTapped,
-            profilePictureBase64: profilePictureBase64,
-            profilePictureUrl: profilePictureUrl,
+            profilePicture: profilePicture,
           ),
         );
       },

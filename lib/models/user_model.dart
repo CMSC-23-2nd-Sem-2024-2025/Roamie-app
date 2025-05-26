@@ -36,7 +36,6 @@ class AppUser {
       email: json['email'],
       username: json['username'],
       travelStyles: List<String>.from(json['travelStyles'] ?? []),
-      // if interest is empty set it to null
       interests: List<String>.from(json['interests'] ?? []),
       profilePicture: json['profilePicture'],
       isVisible: json['isVisible'],
