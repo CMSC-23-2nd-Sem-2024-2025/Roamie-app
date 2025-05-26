@@ -1,0 +1,35 @@
+# flutter pub run flutter_launcher_icons
+flutter_launcher_icons:
+  image_path: "lib/assets/icon/roamie_launcher.png"
+
+  android: "launcher_icon"
+  # image_path_android: "assets/icon/icon.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  adaptive_icon_background: "#FFFFFF"  # or your preferred background color
+  adaptive_icon_foreground: "lib/assets/icon/roamie_launcher.png"
+  # adaptive_icon_monochrome: "assets/icon/monochrome.png"
+
+  ios: true
+  # image_path_ios: "assets/icon/icon.png"
+  remove_alpha_channel_ios: true
+  # image_path_ios_dark_transparent: "assets/icon/icon_dark.png"
+  # image_path_ios_tinted_grayscale: "assets/icon/icon_tinted.png"
+  # desaturate_tinted_to_grayscale_ios: true
+
+  web:
+    generate: true
+    image_path: "lib/assets/icon/roamie_launcher.png"
+    background_color: "#FFFFFF"  # or your preferred background color
+    theme_color: "#FFFFFF"  # or your preferred theme color
+    image_path_web: "lib/assets/icon/roamie_launcher.png"
+    min_sdk_web: 2
+
+  windows:
+    generate: true
+    image_path: "lib/assets/icon/roamie_launcher.png"
+    icon_size: 256  # increased from 48 to 256 for better quality
+
+  macos:
+    generate: true
+    image_path: "lib/assets/icon/roamie_launcher.png"
+    icon_size: 1024  # added icon size for macOS
