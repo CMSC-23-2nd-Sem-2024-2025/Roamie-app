@@ -251,7 +251,7 @@ class _TravelPlanFormScreenState extends State<TravelPlanFormScreen> {
         sharedWith: widget.existing?.sharedWith ?? [],
         imageBase64: _base64Image ?? widget.existing?.imageBase64,
         itinerary: flatItinerary,
-        notificationDays: notificationDays,
+       // notificationDays: notificationDays,
       );
 
       final travelProvider = context.read<TravelProvider>();

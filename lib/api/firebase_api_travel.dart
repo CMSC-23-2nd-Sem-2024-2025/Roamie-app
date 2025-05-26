@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/data/latest.dart';
-import 'package:timezone/timezone.dart';
+
 
 class FirebaseTravelAPI {
   static final FirebaseFirestore db = FirebaseFirestore.instance;
@@ -127,15 +125,7 @@ class FirebaseTravelAPI {
 }
 
 class NotificationsService{
-  static final _notifications=FlutterLocalNotificationsPlugin();
-
-  static Future<void> init() async{
-    final android= AndroidInitializationSettings('@mipmap/ic_launcher');
-    final settings= InitializationSettings(android: android);
-    await _notifications.initialize(settings);
-    initializeTimeZones();
-  }
-
+  
   static Future<void> scheduleNotification({
     required String id,
     required String title,
@@ -143,6 +133,6 @@ class NotificationsService{
     required int daysBefore,
   }) async{
     final scheduledDate=travelDate.subtract(Duration(days: daysBefore));
-    await _notifications.zonedSchedule(id.hashCode, title,'Your trip "$title" is in $daysBefore day/s!',  TZDateTime.from(scheduledDate, local), const NotificationDetails(android: AndroidNotificationDetails('travel_reminder', 'Travel Reminders', importance: Importance.max, priority: Priority.high),), androidAllowWhileIdle: true, uiLocalNotificationDateInterpretation:UILocalNotificationDateInterpretation.absoluteTime,matchDateTimeComponents: DateTimeComponents.dateAndTime,);
+
   }
 }
