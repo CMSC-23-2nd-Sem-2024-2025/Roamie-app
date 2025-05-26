@@ -16,8 +16,11 @@ class BottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
+      type: BottomNavigationBarType.fixed,
       currentIndex: currentIndex,
       onTap: onTap,
+      selectedItemColor: Theme.of(context).primaryColor,
+      unselectedItemColor: Colors.grey,
       items: [
         const BottomNavigationBarItem(
           icon: Icon(Icons.home), 
@@ -26,6 +29,10 @@ class BottomNavBar extends StatelessWidget {
         const BottomNavigationBarItem(
           icon: Icon(Icons.search), 
           label: 'Find'
+        ),
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.people), 
+          label: 'Friends'
         ),
         BottomNavigationBarItem(
           icon: ProfilePictureWidget(
