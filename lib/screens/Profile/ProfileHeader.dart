@@ -53,56 +53,52 @@ class _ProfileHeaderState extends State<ProfileHeader> {
   }
 
   // Pick Image for profile picture
-  Future<void> _pickImage() async {
+ Future<void> _pickImage() async {
   final userProvider = Provider.of<UserProvider>(context, listen: false);
   final userId = userProvider.userId;
 
-  if (userId == null || userId.isEmpty) return;
+  if (userId == null) return;
 
+  // Show options to the user
   showModalBottomSheet(
     context: context,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    builder: (_) => SafeArea(
+      child: Wrap(
+        children: [
+          ListTile(
+            leading: const Icon(Icons.photo_library),
+            title: const Text('Choose from Gallery'),
+            onTap: () async {
+              Navigator.of(context).pop(); // Close the bottom sheet
+              final XFile? file = await ImagePicker().pickImage(source: ImageSource.gallery);
+              await _handlePickedFile(file, userId, userProvider);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.camera_alt),
+            title: const Text('Take a Photo'),
+            onTap: () async {
+              Navigator.of(context).pop(); // Close the bottom sheet
+              final XFile? file = await ImagePicker().pickImage(source: ImageSource.camera);
+              await _handlePickedFile(file, userId, userProvider);
+            },
+          ),
+        ],
+      ),
     ),
-    builder: (BuildContext context) {
-      return SafeArea(
-        child: Wrap(
-          children: <Widget>[
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: const Text('Choose from Gallery'),
-              onTap: () async {
-                Navigator.of(context).pop();
-                final XFile? pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-                if (pickedFile != null) await _updateImage(pickedFile, userId, userProvider);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: const Text('Take a Photo'),
-              onTap: () async {
-                Navigator.of(context).pop();
-                final XFile? pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
-                if (pickedFile != null) await _updateImage(pickedFile, userId, userProvider);
-              },
-            ),
-          ],
-        ),
-      );
-    },
   );
 }
 
-Future<void> _updateImage(XFile pickedFile, String userId, UserProvider userProvider) async {
+Future<void> _handlePickedFile(XFile? pickedFile, String userId, UserProvider userProvider) async {
+  if (pickedFile == null) return;
+
   final Uint8List bytes = await pickedFile.readAsBytes();
   setState(() {
     _image = bytes;
   });
 
   final String base64Image = base64Encode(bytes);
-  await userProvider.updateUser(userId, {
-    'profilePicture': base64Image,
-  });
+  await userProvider.updateUser(userId, {'profilePicture': base64Image});
 }
 
 @override
