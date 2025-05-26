@@ -73,6 +73,7 @@ void initState() {
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Color(0xFF101653),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       backgroundColor: Colors.white,
       body: Padding(
