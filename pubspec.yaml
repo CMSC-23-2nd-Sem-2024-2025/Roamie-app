@@ -24,6 +24,7 @@ flutter:
   assets:
     # Google Sign-in assets: https://developers.google.com/identity/branding-guidelines
     - lib/assets/sign-in/
+    - lib/assets/default_profilepic_roamie.png
   fonts:
   # Font source: https://fonts.google.com/specimen/Poppins
     - family: Poppins
