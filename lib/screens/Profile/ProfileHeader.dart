@@ -52,8 +52,7 @@ class _ProfileHeaderState extends State<ProfileHeader> {
     }
   }
 
-  // Pick Image for profile picture
- Future<void> _pickImage() async {
+Future<void> _pickImage() async {
   final userProvider = Provider.of<UserProvider>(context, listen: false);
   final userId = userProvider.userId;
 
@@ -100,6 +99,7 @@ Future<void> _handlePickedFile(XFile? pickedFile, String userId, UserProvider us
   final String base64Image = base64Encode(bytes);
   await userProvider.updateUser(userId, {'profilePicture': base64Image});
 }
+
 
 @override
   Widget build(BuildContext context) {
