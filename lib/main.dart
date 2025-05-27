@@ -1,10 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:roamie/api/firebase_api_travel.dart';
 import 'package:roamie/firebase_options.dart';
 import 'screens/sign_in_page.dart';
 import 'screens/sign_up_page.dart';
 import 'screens/travel_plans_page.dart';
 import 'screens/find_similar_people_page.dart';
+import 'package:roamie/provider/travel_provider.dart';
 import 'screens/Profile/profile_page.dart';
 import 'screens/friend_list_page.dart';
 import 'components/bottom_nav_bar.dart';
@@ -16,8 +18,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await NotificationsService.init(); 
+
   runApp(
-    ChangeNotifierProvider(create: (_) => UserProvider(), child: const MyApp()),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => TravelProvider()),
+      ],
+      child: const MyApp(),
+    ),
   );
 }
 

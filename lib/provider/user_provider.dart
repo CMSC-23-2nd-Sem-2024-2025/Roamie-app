@@ -50,7 +50,6 @@ class UserProvider with ChangeNotifier {
   // Updates the existing user data in Firestore and notifies listeners
   Future<void> updateUser(String userId, Map<String, dynamic> data) async {
     if (userId.isEmpty) return;
-
     String message = await firebaseService.updateUserByUserId(userId, data);
     print(message);
     notifyListeners();

@@ -11,6 +11,29 @@ enum FriendStatus { none, requestSent, requestReceived, friends }
 class FindSimilarPeoplePage extends StatefulWidget {
   const FindSimilarPeoplePage({super.key});
 
+  final List<Map<String, String>> people = const [
+    {
+      'name': 'Jerome Pagbilao',
+      'interests': 'Hiking, Cooking',
+      'style': 'Backpacking, Budget travel',
+    },
+    {
+      'name': 'Joshua Pagcaliwagan',
+      'interests': 'Photography, Food trips',
+      'style': 'Solo travel, City tours',
+    },
+    {
+      'name': 'Clarence Mandap',
+      'interests': 'Music, Culture',
+      'style': 'Group travel, Relaxation',
+    },
+    {
+      'name': 'Robin Rebugio',
+      'interests': 'Nature, Sports',
+      'style': 'Adventure, Hiking',
+    },
+  ];
+
   @override
   State<FindSimilarPeoplePage> createState() => _FindSimilarPeoplePageState();
 }
